@@ -35,12 +35,13 @@ app.get("/api/notes/:id", (request, response) => {
     })
     .catch((err) => {
       console.log(err);
-      response.status(503).end();
+      response.status(400).end();
     });
 });
 
-app.delete("/api/notes/:id", (request, reponse) => {
-  const id = Number(request.params.id);
+app.delete("/api/notes/:id", (request, response) => {
+  const { id } = request.params;
+
   notes = notes.filter((e) => e.id !== id);
   response.status(204).end();
 });
@@ -71,7 +72,7 @@ app.use((request, response) => {
   });
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
