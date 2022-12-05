@@ -1,38 +1,42 @@
+require("dotenv").config();
+require("./mongo");
+
 const express = require("express"); //const express = require("express") //FUNCIONA IGUAL CON COMMONJS
 const cors = require("cors");
+const User = require("./models/User");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-let notes = [
-  {
-    id: 1,
-    name: "te amo",
-  },
-  {
-    id: 2,
-    name: "diana",
-  },
-];
+let users = [];
 
 app.get("/", (request, response) => {
   response.send("<h1>Hello World</h1>");
 });
 
 app.get("/api/notes", (request, response) => {
-  response.json(notes);
+  User.find({}).then((user) => {
+    response.json(user);
+  });
 });
+
 /* EN LA REQUEST SIEMPRE LLEGA STRINGS */
 app.get("/api/notes/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const result = notes.filter((e) => e.id === id);
+  const { id } = request.params;
 
-  if (result.length > 0) {
-    response.json(result);
-  } else {
-    response.status(404).end();
-  }
+  User.findById(id)
+    .then((user) => {
+      if (user) {
+        response.json(user);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      response.status(503).end();
+    });
 });
 
 app.delete("/api/notes/:id", (request, reponse) => {
@@ -42,23 +46,23 @@ app.delete("/api/notes/:id", (request, reponse) => {
 });
 
 app.post("/api/notes", (request, response) => {
-  const note = request.body;
+  const user = request.body;
 
-  if (!note || !note.name) {
+  if (!user || !user.name) {
     return response.status(400).json({
       error: "No data",
     });
   }
 
-  const newId = notes.length + 1;
+  const newUser = new User({
+    name: user.name,
+    date: new Date(),
+    important: user.important || false,
+  });
 
-  const newNote = {
-    id: newId,
-    name: note.name,
-    created: new Date().toISOString(),
-  };
-  notes.push(newNote);
-  response.status(201).json(note);
+  newUser.save().then((savedUser) => {
+    response.json(savedUser);
+  });
 });
 
 app.use((request, response) => {
