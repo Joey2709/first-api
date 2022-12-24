@@ -3,7 +3,6 @@ require("./mongo");
 
 const express = require("express"); //const express = require("express") //FUNCIONA IGUAL CON COMMONJS
 const cors = require("cors");
-const jwt = require("jsonwebtoken");
 
 const Note = require("./models/Note");
 const User = require("./models/User");
@@ -107,8 +106,8 @@ app.put("/api/notes/:id", userExtractor, (request, response, next) => {
 });
 
 //app.use("/api/notes", noteRouter);
-app.use("/api/login", loginRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/login", loginRouter);
 
 app.use(notFound);
 
